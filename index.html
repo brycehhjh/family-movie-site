@@ -1,1 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Our Family Movie List</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyAdNY6lNC1R0nyDko13TwkPfVeBkN0WV5g",
+      authDomain: "yourproject.firebaseapp.com",
+      projectId: "yourproject",
+      storageBucket: "yourproject.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdefghij"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const movieListElement = document.getElementById('movie-list');
+    const movieInput = document.getElementById('movieInput');
+
+    async function loadMovies() {
+      const querySnapshot = await getDocs(collection(db, "movies"));
+      movieListElement.innerHTML = '';
+      querySnapshot.forEach((docSnap) => {
+        const li = document.createElement('li');
+        li.textContent = docSnap.data().name;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'delete-button';
+        deleteBtn.onclick = async () => {
+          await deleteDoc(doc(db, "movies", docSnap.id));
+          loadMovies();
+        };
+
+        li.appendChild(deleteBtn);
+        movieListElement.appendChild(li);
+      });
+    }
+
+    async function addMovie() {
+      const movie = movieInput.value.trim();
+      if (movie) {
+        await addDoc(collection(db, "movies"), { name: movie });
+        movieInput.value = '';
+        loadMovies();
+      }
+    }
+
+    window.addMovie = addMovie;
+    window.onload = loadMovies;
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
+      text-align: center;
+      padding: 2em;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 5px;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-left: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .delete-button {
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    video {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎥 Our Family Movie Night</h1>
+  <p>Here's a list of movies we love or want to watch!</p>
+
+  <ul id="movie-list"></ul>
+
+  <input type="text" id="movieInput" placeholder="Add a new movie" />
+  <button onclick="addMovie()">Add Movie</button>
+
+  <h2>🎞️ Watch a Family Video</h2>
+  <input type="file" id="videoUploader" accept="video/*">
+  <br>
+  <video id="videoPlayer" controls></video>
+
+  <script>
+    const videoUploader = document.getElementById('videoUploader');
+    const videoPlayer = document.getElementById('videoPlayer');
+
+    videoUploader.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        const videoURL = URL.createObjectURL(file);
+        videoPlayer.src = videoURL;
+      }
+    });
+  </script>
+</body>
+</html>
