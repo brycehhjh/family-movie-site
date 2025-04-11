@@ -6,27 +6,23 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBPoc_gBeaBzfOrZAfJEI3eEJwYUZ52PnY",
-      authDomain: "yourproject.firebaseapp.com",
-      projectId: "yourproject",
-      storageBucket: "yourproject.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdefghij"
+      authDomain: "familymoviesite-248c3.firebaseapp.com",
+      databaseURL: "https://familymoviesite-248c3-default-rtdb.firebaseio.com",
+      projectId: "familymoviesite-248c3",
+      storageBucket: "familymoviesite-248c3.firebasestorage.app",
+      messagingSenderId: "418523798536",
+      appId: "1:418523798536:web:5692c71a14f7ef1a0845bd",
+      measurementId: "G-LC5VG865XJ"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
 
     const movieListElement = document.getElementById('movie-list');
     const movieInput = document.getElementById('movieInput');
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const userDisplay = document.getElementById('userDisplay');
 
     async function loadMovies() {
       const querySnapshot = await getDocs(collection(db, "movies"));
@@ -59,38 +55,8 @@
 
     window.addMovie = addMovie;
 
-    loginBtn.onclick = () => {
-      signInWithPopup(auth, provider)
-        .then((result) => {
-          const user = result.user;
-          userDisplay.textContent = `Signed in as: ${user.displayName}`;
-          loginBtn.style.display = 'none';
-          logoutBtn.style.display = 'inline';
-          loadMovies();
-        });
-    };
-
-    logoutBtn.onclick = () => {
-      signOut(auth).then(() => {
-        userDisplay.textContent = '';
-        loginBtn.style.display = 'inline';
-        logoutBtn.style.display = 'none';
-        movieListElement.innerHTML = '';
-      });
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        userDisplay.textContent = `Signed in as: ${user.displayName}`;
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline';
-        loadMovies();
-      } else {
-        userDisplay.textContent = '';
-        loginBtn.style.display = 'inline';
-        logoutBtn.style.display = 'none';
-      }
-    });
+    // Load movies on page load
+    loadMovies();
   </script>
   <style>
     body {
@@ -134,20 +100,11 @@
       margin-top: 20px;
       max-width: 100%;
     }
-    #auth-controls {
-      margin-bottom: 1em;
-    }
   </style>
 </head>
 <body>
   <h1>🎥 Our Family Movie Night</h1>
   <p>Here's a list of movies we love or want to watch!</p>
-
-  <div id="auth-controls">
-    <button id="loginBtn">Sign in with Google</button>
-    <button id="logoutBtn" style="display:none">Sign Out</button>
-    <p id="userDisplay"></p>
-  </div>
 
   <ul id="movie-list"></ul>
 
@@ -173,3 +130,4 @@
   </script>
 </body>
 </html>
+
