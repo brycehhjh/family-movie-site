@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Our Family Movie List</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fefefe;
+      text-align: center;
+      padding: 2em;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      padding: 5px;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    input {
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 12px;
+      margin-left: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .delete-button {
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    video {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎥 Our Family Movie Night</h1>
+  <p>Here's a list of movies we love or want to watch!</p>
+
+  <ul id="movie-list"></ul>
+
+  <input type="text" id="movieInput" placeholder="Add a new movie" />
+  <button onclick="addMovie()">Add Movie</button>
+
+  <h2>🎞️ Watch a Family Video</h2>
+  <input type="file" id="videoUploader" accept="video/*">
+  <br>
+  <video id="videoPlayer" controls></video>
+
+  <script>
+    const movieListElement = document.getElementById('movie-list');
+    const movieInput = document.getElementById('movieInput');
+
+    function saveMovies(movies) {
+      localStorage.setItem('familyMovies', JSON.stringify(movies));
+    }
+
+    function loadMovies() {
+      const stored = localStorage.getItem('familyMovies');
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function renderMovies() {
+      const movies = loadMovies();
+      movieListElement.innerHTML = '';
+      movies.forEach((movie, index) => {
+        const li = document.createElement('li');
+        li.textContent = movie;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'delete-button';
+        deleteBtn.onclick = () => deleteMovie(index);
+
+        li.appendChild(deleteBtn);
+        movieListElement.appendChild(li);
+      });
+    }
+
+    function addMovie() {
+      const movie = movieInput.value.trim();
+      if (movie) {
+        const movies = loadMovies();
+        movies.push(movie);
+        saveMovies(movies);
+        renderMovies();
+        movieInput.value = '';
+      }
+    }
+
+    function deleteMovie(index) {
+      const movies = loadMovies();
+      movies.splice(index, 1);
+      saveMovies(movies);
+      renderMovies();
+    }
+
+    const videoUploader = document.getElementById('videoUploader');
+    const videoPlayer = document.getElementById('videoPlayer');
+
+    videoUploader.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file) {
+        const videoURL = URL.createObjectURL(file);
+        videoPlayer.src = videoURL;
+      }
+    });
+
+    // Load saved movies on startup
+    renderMovies();
+  </script>
+</body>
+</html>
