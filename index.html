@@ -6,9 +6,10 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyAdNY6lNC1R0nyDko13TwkPfVeBkN0WV5g",
+      apiKey: "AIzaSyBPoc_gBeaBzfOrZAfJEI3eEJwYUZ52PnY",
       authDomain: "yourproject.firebaseapp.com",
       projectId: "yourproject",
       storageBucket: "yourproject.appspot.com",
@@ -18,9 +19,14 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     const movieListElement = document.getElementById('movie-list');
     const movieInput = document.getElementById('movieInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userDisplay = document.getElementById('userDisplay');
 
     async function loadMovies() {
       const querySnapshot = await getDocs(collection(db, "movies"));
@@ -52,7 +58,39 @@
     }
 
     window.addMovie = addMovie;
-    window.onload = loadMovies;
+
+    loginBtn.onclick = () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          userDisplay.textContent = `Signed in as: ${user.displayName}`;
+          loginBtn.style.display = 'none';
+          logoutBtn.style.display = 'inline';
+          loadMovies();
+        });
+    };
+
+    logoutBtn.onclick = () => {
+      signOut(auth).then(() => {
+        userDisplay.textContent = '';
+        loginBtn.style.display = 'inline';
+        logoutBtn.style.display = 'none';
+        movieListElement.innerHTML = '';
+      });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        userDisplay.textContent = `Signed in as: ${user.displayName}`;
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline';
+        loadMovies();
+      } else {
+        userDisplay.textContent = '';
+        loginBtn.style.display = 'inline';
+        logoutBtn.style.display = 'none';
+      }
+    });
   </script>
   <style>
     body {
@@ -96,11 +134,20 @@
       margin-top: 20px;
       max-width: 100%;
     }
+    #auth-controls {
+      margin-bottom: 1em;
+    }
   </style>
 </head>
 <body>
   <h1>🎥 Our Family Movie Night</h1>
   <p>Here's a list of movies we love or want to watch!</p>
+
+  <div id="auth-controls">
+    <button id="loginBtn">Sign in with Google</button>
+    <button id="logoutBtn" style="display:none">Sign Out</button>
+    <p id="userDisplay"></p>
+  </div>
 
   <ul id="movie-list"></ul>
 
